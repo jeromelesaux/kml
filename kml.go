@@ -2,10 +2,9 @@ package kml
 
 import (
 	"encoding/xml"
-	"strconv"
 	"fmt"
+	"strconv"
 )
-
 
 type AltitudeModeKey int
 
@@ -43,12 +42,12 @@ type Description struct {
 
 //Placemark template
 type Placemark struct {
-	Name        string       `xml:"name"`
-	Description Description  `xml:"description"`
-	StyleUrl    string       `xml:"styleUrl"`
-	Style       Style        `xml:"Style,omitempty"`
-	Point       Point        `xml:"Point,omitempty"`
-	LineString  []LineString `xml:"LineString,omitempty"`
+	Name        string        `xml:"name"`
+	Description Description   `xml:"description"`
+	StyleUrl    string        `xml:"styleUrl"`
+	Style       *Style        `xml:"Style,omitempty"`
+	Point       Point         `xml:"Point,omitempty"`
+	LineString  []*LineString `xml:"LineString,omitempty"`
 }
 
 // linestring google template
@@ -87,9 +86,9 @@ type Style struct {
 }
 
 type Document struct {
-	Name      string      `xml:"name"`
-	Style     Style       `xml:"Style"`
-	Placemark []Placemark `xml:"Placemark"`
+	Name       string      `xml:"name"`
+	Styles     []Style     `xml:"Style"`
+	Placemarks []Placemark `xml:"Placemark"`
 }
 
 //Kml template
@@ -113,12 +112,12 @@ func NewKML(namespace string, numPlacemarks int) *Kml {
 	kml.GxNamespace = "http://www.google.com/kml/ext/2.2"
 	kml.KmlNamespace = "http://www.opengis.net/kml/2.2"
 	//kml.XalNamespace = "urn:oasis:names:tc:ciq:xsdschema:xAL:2.0"
-	kml.Document.Placemark = make([]Placemark, numPlacemarks)
+	kml.Document.Placemarks = make([]Placemark, numPlacemarks)
 	return kml
 }
 
 func (k *Kml) AddPlacemark(placemark Placemark) {
-	k.Document.Placemark = append(k.Document.Placemark, placemark)
+	k.Document.Placemarks = append(k.Document.Placemarks, placemark)
 }
 
 //func (k *Kml) AddPlacemark(name string, desc string, point string) {
@@ -130,7 +129,7 @@ func (k *Kml) AddPlacemark(placemark Placemark) {
 //}
 
 func (p *Placemark) AddLineString(lineString LineString) {
-	p.LineString = append(p.LineString, lineString)
+	p.LineString = append(p.LineString, &lineString)
 }
 
 func (l *LineString) AddCoordinate(longitude float64, latitude float64, altitude float64) {
@@ -142,8 +141,6 @@ func (l *LineString) AddCoordinate(longitude float64, latitude float64, altitude
 func (k *Kml) Marshal() ([]byte, error) {
 	return xml.MarshalIndent(k, "", "    ")
 }
-
-
 
 func (p *Placemark) AppendContent(content string) {
 	p.Description.Data += "<br>" + content

@@ -48,7 +48,7 @@ func (k *DocKml) Save(filename string) error {
 	zip := zip.NewWriter(archive)
 
 	kmlContent := string(content)
-	var files = []zipArchive{{"doc.xml", kmlContent}}
+	var files = []zipArchive{{"doc.kml", kmlContent}}
 
 	for _, icon := range k.IconsPath {
 		f, err := os.Open(icon)
@@ -60,7 +60,7 @@ func (k *DocKml) Save(filename string) error {
 		buffIcon := bufio.NewReader(f)
 		buffIcon.Read(fBytes)
 		filename := filepath.Base(icon)
-		files = append(files, zipArchive{Name: filename, Body: string(fBytes)})
+		files = append(files, zipArchive{Name: "files/" + filename, Body: string(fBytes)})
 	}
 
 	for _, file := range files {
