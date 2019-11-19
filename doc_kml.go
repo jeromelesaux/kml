@@ -50,17 +50,24 @@ func (k *DocKml) Save(filename string) error {
 	kmlContent := string(content)
 	var files = []zipArchive{{"doc.kml", kmlContent}}
 
-	for _, icon := range k.IconsPath {
-		f, err := os.Open(icon)
-		if err != nil {
-			return err
+	if len(k.IconsPath) > 0 {
+		for _, icon := range k.IconsPath {
+			f, err := os.Open(icon)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while opening file [%s]  error : %v\n", icon, err)
+				continue
+			}
+			stats, err := f.Stat()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while getting stats on file [%s]  error : %v\n", icon, err)
+				continue
+			}
+			fBytes := make([]byte, stats.Size())
+			buffIcon := bufio.NewReader(f)
+			buffIcon.Read(fBytes)
+			filename := filepath.Base(icon)
+			files = append(files, zipArchive{Name: "files/" + filename, Body: string(fBytes)})
 		}
-		stats, err := f.Stat()
-		fBytes := make([]byte, stats.Size())
-		buffIcon := bufio.NewReader(f)
-		buffIcon.Read(fBytes)
-		filename := filepath.Base(icon)
-		files = append(files, zipArchive{Name: "files/" + filename, Body: string(fBytes)})
 	}
 
 	for _, file := range files {
@@ -73,7 +80,9 @@ func (k *DocKml) Save(filename string) error {
 			return err
 		}
 	}
+	fmt.Fprintf(os.Stdout, "Zipping kml document [%s]\n", filename)
 	zip.Close()
+	fmt.Fprintf(os.Stdout, "Kml document zip ended [%s]\n", filename)
 
 	return nil
 }

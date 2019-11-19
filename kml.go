@@ -86,9 +86,15 @@ type Style struct {
 }
 
 type Document struct {
+	Name    string   `xml:"name"`
+	Styles  []Style  `xml:"Style"`
+	Folders []Folder `xml:"Folder"`
+}
+
+type Folder struct {
 	Name       string      `xml:"name"`
-	Styles     []Style     `xml:"Style"`
 	Placemarks []Placemark `xml:"Placemark"`
+	Open       int         `xml:"open"`
 }
 
 //Kml template
@@ -112,12 +118,20 @@ func NewKML(namespace string, numPlacemarks int) *Kml {
 	kml.GxNamespace = "http://www.google.com/kml/ext/2.2"
 	kml.KmlNamespace = "http://www.opengis.net/kml/2.2"
 	//kml.XalNamespace = "urn:oasis:names:tc:ciq:xsdschema:xAL:2.0"
-	kml.Document.Placemarks = make([]Placemark, numPlacemarks)
+	kml.Document.Folders = make([]Folder, numPlacemarks)
 	return kml
 }
 
-func (k *Kml) AddPlacemark(placemark Placemark) {
-	k.Document.Placemarks = append(k.Document.Placemarks, placemark)
+func (f *Folder) AddPlacemark(placemark Placemark) {
+	f.Placemarks = append(f.Placemarks, placemark)
+}
+
+func (k *Kml) AddFolder(folder Folder) {
+	k.Document.Folders = append(k.Document.Folders, folder)
+}
+
+func NewFolder(name string) Folder {
+	return Folder{Name: name, Open: 1, Placemarks: make([]Placemark, 0)}
 }
 
 //func (k *Kml) AddPlacemark(name string, desc string, point string) {
