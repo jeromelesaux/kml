@@ -64,7 +64,10 @@ func (k *DocKml) Save(filename string) error {
 			}
 			fBytes := make([]byte, stats.Size())
 			buffIcon := bufio.NewReader(f)
-			buffIcon.Read(fBytes)
+			_, err = buffIcon.Read(fBytes)
+			if err != nil {
+				return err
+			}
 			filename := filepath.Base(icon)
 			files = append(files, zipArchive{Name: "files/" + filename, Body: string(fBytes)})
 		}
